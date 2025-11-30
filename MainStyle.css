@@ -1,0 +1,15 @@
+span {
+    border: 1px solid black;
+    background-color: beige;
+    padding: 5px;
+}
+body {
+    border: 10px;
+    background-image: url(cover.avif);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+table {
+    background-color: beige;
+}
