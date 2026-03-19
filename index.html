@@ -1,318 +1,500 @@
-// Wait for page to load
-window.onload = function() {
-    
-    // Get elements for login/signup form
-    var formOpenBtn = document.getElementById("form-open");
-    var home = document.querySelector(".home");
-    var formContainer = document.querySelector(".form_container");
-    var signupLink = document.getElementById("signup");
-    var loginLink = document.getElementById("login");
-    
-    // Open form when button is clicked
-    if (formOpenBtn) {
-        formOpenBtn.onclick = function() {
-            home.classList.add("show");
-            document.body.classList.add("no-scroll");
-        };
-    }
-    
-    // Close form when X is clicked
-    var closeButtons = document.querySelectorAll(".xicon");
-    for (var i = 0; i < closeButtons.length; i++) {
-        closeButtons[i].onclick = function() {
-            home.classList.remove("show");
-            document.body.classList.remove("no-scroll");
-        };
-    }
-    
-    // Close form when clicking outside
-    if (home) {
-        home.onclick = function(e) {
-            if (e.target === home) {
-                home.classList.remove("show");
-                document.body.classList.remove("no-scroll");
-            }
-        };
-    }
-    
-    // Switch to signup form
-    if (signupLink) {
-        signupLink.onclick = function(e) {
-            e.preventDefault();
-            formContainer.classList.add("active");
-        };
-    }
-    
-    // Switch to login form
-    if (loginLink) {
-        loginLink.onclick = function(e) {
-            e.preventDefault();
-            formContainer.classList.remove("active");
-        };
-    }
-    
-    // Login form
-    var loginForm = document.getElementById("loginForm");
-    if (loginForm) {
-        loginForm.onsubmit = function(e) {
-            e.preventDefault();
-            var formData = new FormData(loginForm);
-            var submitBtn = loginForm.querySelector(".button");
-            submitBtn.value = "Logging in...";
-            submitBtn.disabled = true;
-            
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "user.php", true);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    try {
-                        var data = JSON.parse(xhr.responseText);
-                        alert(data.message);
-                        if (data.status === "success") {
-                            loginForm.reset();
-                            home.classList.remove("show");
-                            document.body.classList.remove("no-scroll");
-                            if (data.redirect) {
-                                window.location.href = data.redirect;
-                            }
-                        }
-                    } catch (err) {
-                        alert("Login failed. Please try again.");
-                    }
-                } else {
-                    alert("Login failed. Please try again.");
-                }
-                submitBtn.value = "Login Now";
-                submitBtn.disabled = false;
-            };
-            xhr.onerror = function() {
-                alert("Network error. Please check your connection.");
-                submitBtn.value = "Login Now";
-                submitBtn.disabled = false;
-            };
-            xhr.send(formData);
-        };
-    }
-    
-    // Signup form
-    var signupForm = document.getElementById("signupForm");
-    if (signupForm) {
-        signupForm.onsubmit = function(e) {
-            e.preventDefault();
-            var formData = new FormData(signupForm);
-            var submitBtn = signupForm.querySelector(".button");
-            submitBtn.value = "Signing up...";
-            submitBtn.disabled = true;
-            
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "user.php", true);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    try {
-                        var data = JSON.parse(xhr.responseText);
-                        alert(data.message);
-                        if (data.status === "success") {
-                            signupForm.reset();
-                            formContainer.classList.remove("active");
-                        }
-                    } catch (err) {
-                        alert("Registration failed. Please try again.");
-                    }
-                } else {
-                    alert("Registration failed. Please try again.");
-                }
-                submitBtn.value = "Signup Now";
-                submitBtn.disabled = false;
-            };
-            xhr.onerror = function() {
-                alert("Network error. Please check your connection.");
-                submitBtn.value = "Signup Now";
-                submitBtn.disabled = false;
-            };
-            xhr.send(formData);
-        };
-    }
-    
-    // Card flip functionality
-    var cards = document.querySelectorAll(".card");
-    for (var i = 0; i < cards.length; i++) {
-        var card = cards[i];
-        
-        card.onmouseenter = function() {
-            this.classList.add("is-flipped");
-        };
-        
-        card.onmouseleave = function() {
-            this.classList.remove("is-flipped");
-        };
-        
-        card.onclick = function(e) {
-            var btn = e.target.closest(".btn-white");
-            if (!btn) {
-                this.classList.toggle("is-flipped");
-            }
-        };
-    }
-    
-    // Booking modal
-    var bookingModal = document.getElementById("bookingModal");
-    var bookingTourName = document.getElementById("bookingTourName");
-    var bookingCloseBtn = document.querySelector(".booking-close-btn");
-    var bookingForm = document.getElementById("bookingForm");
-    var bookNowButtons = document.querySelectorAll(".btn-white");
-    
-    for (var i = 0; i < bookNowButtons.length; i++) {
-        bookNowButtons[i].onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            var tourCard = this.closest(".card");
-            if (tourCard) {
-                var tourName = tourCard.querySelector(".card-heading-color");
-                if (tourName) {
-                    bookingTourName.innerHTML = "Tour: " + tourName.innerHTML;
-                }
-            }
-            
-            bookingModal.classList.add("show");
-            document.body.classList.add("no-scroll");
-        };
-    }
-    
-    // Close booking modal
-    if (bookingCloseBtn) {
-        bookingCloseBtn.onclick = function() {
-            bookingModal.classList.remove("show");
-            document.body.classList.remove("no-scroll");
-        };
-    }
-    
-    // Close modal when clicking outside
-    if (bookingModal) {
-        bookingModal.onclick = function(e) {
-            if (e.target === bookingModal) {
-                bookingModal.classList.remove("show");
-                document.body.classList.remove("no-scroll");
-            }
-        };
-    }
-    
-    // Booking form submission
-    if (bookingForm) {
-        bookingForm.onsubmit = function(e) {
-            e.preventDefault();
-            
-            var formData = new FormData(bookingForm);
-            var submitBtn = bookingForm.querySelector(".booking-submit-btn");
-            submitBtn.value = "Sending...";
-            submitBtn.disabled = true;
-            
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "booking.php", true);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    try {
-                        var data = JSON.parse(xhr.responseText);
-                        alert(data.message);
-                        if (data.status === "success") {
-                            bookingModal.classList.remove("show");
-                            document.body.classList.remove("no-scroll");
-                            bookingForm.reset();
-                        }
-                    } catch (err) {
-                        alert("Booking failed. Please try again.");
-                    }
-                } else {
-                    alert("Booking failed. Please try again.");
-                }
-                submitBtn.value = "Confirm Booking";
-                submitBtn.disabled = false;
-            };
-            xhr.send(formData);
-        };
-    }
-    
-    // Smooth scroll for navigation links
-    var anchorLinks = document.querySelectorAll("a[href^='#']");
-    for (var i = 0; i < anchorLinks.length; i++) {
-        anchorLinks[i].onclick = function(e) {
-            e.preventDefault();
-            var targetId = this.getAttribute("href");
-            if (targetId === "#") {
-                return;
-            }
-            
-            var targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                var navHeight = document.querySelector(".navigation").offsetHeight;
-                var viewportHeight = window.innerHeight;
-                var elementHeight = targetElement.offsetHeight;
-                var scrollPosition = targetElement.offsetTop - (viewportHeight / 2) + (elementHeight / 2);
-                
-                window.scrollTo(scrollPosition, "smooth");
-            }
-        };
-    }
-    
-    // Password visibility toggle
-    // This function is called from the HTML onclick attribute
-    window.togglePassword = function(inputId, toggleIcon) {
-        var passwordInput = document.getElementById(inputId);
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-            toggleIcon.classList.add("active");
-        } else {
-            passwordInput.type = "password";
-            toggleIcon.classList.remove("active");
-        }
-    };
-    
-    // CTA button - show contact section
-    var ctaContactBtn = document.getElementById("cta-contact-btn");
-    var contactSection = document.getElementById("contact");
-    var contactCloseBtn = document.getElementById("contact-close-btn");
-    
-    if (ctaContactBtn && contactSection) {
-        ctaContactBtn.onclick = function(e) {
-            e.preventDefault();
-            contactSection.classList.remove("contact-hidden");
-            contactSection.classList.add("contact-visible");
-            
-            setTimeout(function() {
-                contactSection.scrollIntoView({ behavior: "smooth", block: "start" });
-            }, 100);
-        };
-    }
+<!DOCTYPE html>
+<html lang="en">
 
-    // Testimonials counter animation
-    var counterElements = document.querySelectorAll(".stat-number");
-    var testimonialSection = document.querySelector(".section-testimonials");
-    
-    if (testimonialSection && counterElements.length > 0) {
-        // Simple animation without Intersection Observer
-        function animateCounters() {
-            for (var i = 0; i < counterElements.length; i++) {
-                var element = counterElements[i];
-                var target = parseInt(element.getAttribute("data-count"));
-                var duration = 2000;
-                var step = target / (duration / 16);
-                var current = 0;
-                
-                function updateCounter() {
-                    current = current + step;
-                    if (current < target) {
-                        element.innerHTML = Math.floor(current) + "+";
-                        setTimeout(updateCounter, 16);
-                    } else {
-                        element.innerHTML = target + "+";
-                    }
-                }
-                
-                updateCounter();
-            }
-        }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aguiland Travel Service</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="media-query.css">
+</head>
+
+<body>
+    <div class="page-wrapper">
+      <!-- NAVIGATION SECTION -->
+        <nav class="navigation">
+            <div class="container-lg">
+                <div class="nav-wrapper">
+                    <a href="#" class="logo">
+                        <img src="Images/Aguiland logo High Res.png" width="80" alt="logo">
+                    </a>
+
+                    <div class="navlink-wrapper">
+                        <a href="index.html" class="navlink">Home</a>
+                        <a href="#about" class="navlink">About</a>
+                        <a href="#tour" class="navlink">Tours</a>
+                        <a href="#reviews" class="navlink">Reviews</a>
+                        <a href="#cta-section" class="navlink">Contact</a>
+                        <button class="button" id="form-open">Login</button>
+                    </div>
+                </div>
+
+
+            </div>
+        </nav>
+          <!-- HERO SECTION -->
+        <main>
+            <section class="hero-section" id="hero-section">
+               <div class="backdrop">
+                <div class="container-lg">
+                    <div class="hero-wrapper">
+                        <h1>Travel PHILIPPINES</h1>
+                        <p>with NO HASSLE</p>
+                        <a href="#tours" class="btn">Book Now</a>
+                    </div>
+                </div>
+               </div>
+<hr>
+            </section>
+             <!-- ABOUT SECTION -->
+            <section id="about">
+                <div class="container-lg">
+                    <div class="about-wrapper">
+                        <h2>About Aguiland Travel Services</h2>
+                        <p>Aguiland Travel Services — your premier choice for private van travel across the Philippines. We specialize in comfortable, hassle-free tours to the country's most popular destinations, including Boracay, Cordillera, Pinatubo, and more. Our private vans accommodate groups, giving you the flexibility to explore at your own pace. With all-inclusive packages, professional drivers, and a commitment to customer satisfaction, we're here to make your Philippine adventure truly unforgettable.</p>
+                            <a href="#hero-section" class="btn">About Us</a>
+                    </div>
+                </div>
+            </section>
+             <!-- TOUR SECTION -->
+            <section id="tours">
+        <div class="heading-part" id="tour">
+        <h2 class="heading-secondary">
+          Most Popular Tours
+        </h2>
+      </div>
+         <div class="row">
+      <div class="col-1-of-3">
+        <div class="card">
+           <div class="card-side card-side-front">
+             <div class="card-picture card-picture-1">
+               &nbsp;
+             </div>
+             <h4 class="card-heading">
+               <span class="card-heading-color card-heading-color-1">Boracay</span>                
+             </h4>
+             <div class="card-details">
+               <ul>
+                 <li>5 day tour</li>
+                 <li>Up to 5 people</li>
+                 <li>INCLUSIONS:</li>
+                 <li>A cozy hotels to stay</li>
+                 <li>Food allowance until 3k </li>
+               </ul>
+             </div>           
+          </div>
+          <div class="card-side card-side-back card-side-back-1">
+             <div class="card-cta">
+               <div class="card-price-box">
+                 <p class="card-price-only">Only</p>
+                 <p class="card-price-value">P35,000</p>
+               </div>
+               <a href="#" class="btn btn-white">Book Now!</a>
+            </div>
+          </div>
+        </div>
+      </div>
+   <div class="col-1-of-3">
+        <div class="card">
+           <div class="card-side card-side-front">
+             <div class="card-picture card-picture-2">
+               &nbsp;
+             </div>
+             <h4 class="card-heading">
+               <span class="card-heading-color card-heading-color-2">Cordillera</span>                
+             </h4>
+             <div class="card-details">
+               <ul>
+                 <li>4 day tour</li>
+                 <li>Up to 8 people</li>
+                 <li>INCLUSIONS:</li>
+                 <li>A cozy house to stay</li>
+                 <li>Food allowance until 1k </li>
+               </ul>
+             </div>           
+          </div>
+          <div class="card-side card-side-back card-side-back-2">
+             <div class="card-cta">
+               <div class="card-price-box">
+                 <p class="card-price-only">Only</p>
+                 <p class="card-price-value">P18,000</p>
+               </div>
+               <a href="#" class="btn btn-white">Book Now!</a>
+            </div>
+          </div>
+        </div>
+      </div>
+           <div class="col-1-of-3">
+        <div class="card">
+           <div class="card-side card-side-front">
+             <div class="card-picture card-picture-3">
+               &nbsp;
+             </div>
+             <h4 class="card-heading">
+               <span class="card-heading-color card-heading-color-3">Pinatubo</span>                
+             </h4>
+             <div class="card-details">
+               <ul>
+                 <li>3 day tour</li>
+                 <li>Up to 8 people</li>
+                 <li>INCLUSIONS:</li>
+                 <li>Sleep in provided tents</li>
+                 <li>Food allowance until 1k </li>
+               </ul>
+             </div>           
+          </div>
+          <div class="card-side card-side-back card-side-back-3">
+             <div class="card-cta">
+               <div class="card-price-box">
+                 <p class="card-price-only">Only</p>
+                 <p class="card-price-value">P15,000</p>
+               </div>
+               <a href="#" class="btn btn-white">Book Now!</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-1-of-3">
+        <div class="card">
+           <div class="card-side card-side-front">
+             <div class="card-picture card-picture-4">
+               &nbsp;
+             </div>
+             <h4 class="card-heading">
+               <span class="card-heading-color card-heading-color-4">Coron</span>                
+             </h4>
+             <div class="card-details">
+               <ul>
+                 <li>5 day tour</li>
+                 <li>Up to 6 people</li>
+                 <li>INCLUSIONS:</li>
+                 <li>Beach resort stay</li>
+                 <li>Island hopping included</li>
+               </ul>
+             </div>           
+          </div>
+          <div class="card-side card-side-back card-side-back-4">
+             <div class="card-cta">
+               <div class="card-price-box">
+                 <p class="card-price-only">Only</p>
+                 <p class="card-price-value">P42,000</p>
+               </div>
+               <a href="#" class="btn btn-white">Book Now!</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-1-of-3">
+        <div class="card">
+           <div class="card-side card-side-front">
+             <div class="card-picture card-picture-5">
+               &nbsp;
+             </div>
+             <h4 class="card-heading">
+               <span class="card-heading-color card-heading-color-5">Cebu</span>                
+             </h4>
+             <div class="card-details">
+               <ul>
+                 <li>4 day tour</li>
+                 <li>Up to 8 people</li>
+                 <li>INCLUSIONS:</li>
+                 <li>Hotel accommodation</li>
+                 <li>Whale shark experience</li>
+               </ul>
+             </div>           
+          </div>
+          <div class="card-side card-side-back card-side-back-5">
+             <div class="card-cta">
+               <div class="card-price-box">
+                 <p class="card-price-only">Only</p>
+                 <p class="card-price-value">P28,000</p>
+               </div>
+               <a href="#" class="btn btn-white">Book Now!</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-1-of-3">
+        <div class="card">
+           <div class="card-side card-side-front">
+             <div class="card-picture card-picture-6">
+               &nbsp;
+             </div>
+             <h4 class="card-heading">
+               <span class="card-heading-color card-heading-color-6">Siargao</span>                
+             </h4>
+             <div class="card-details">
+               <ul>
+                 <li>4 day tour</li>
+                 <li>Up to 6 people</li>
+                 <li>INCLUSIONS:</li>
+                 <li>Surf resort stay</li>
+                 <li>Island hopping included</li>
+               </ul>
+             </div>           
+          </div>
+          <div class="card-side card-side-back card-side-back-6">
+             <div class="card-cta">
+               <div class="card-price-box">
+                 <p class="card-price-only">Only</p>
+                 <p class="card-price-value">P32,000</p>
+               </div>
+               <a href="#" class="btn btn-white">Book Now!</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>       
+</div>
+<br>      
+      <div class="tour-btn">
+        <a href="#" class="btn btn-blue">Discover all tours</a>   
+      </div> 
+        </section>
+<br>             
+<!-- REVIEW SECTION -->
+     <section id="reviews" class="section-testimonials">
+        <div class="testimonials-heading">
+          <h2 class="heading-secondary">What Our Travelers Say</h2>
+          <p class="testimonials-subtitle">Real experiences from our happy customers</p>
+        </div>
         
-        // Run animation after a delay
-        setTimeout(animateCounters, 1000);
-    }
-};
+        <div class="testimonials-container">
+          <div class="testimonial-card testimonial-card-1">
+            <p class="testimonial-text">"Amazing experience! The van was comfortable and the driver was very professional. Highly recommend for anyone visiting the Philippines!"</p>
+            <div class="testimonial-author">
+              <img src="Images/FB2.jpg" alt="Bianca Samarita" class="testimonial-avatar">
+              <div class="testimonial-info">
+                <h4>Bianca Samarita</h4>
+                <span>Boracay Tour</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card testimonial-card-2">
+            <p class="testimonial-text">"Best travel service ever! Everything was well organized from start to finish. The Cordillera trip was breathtaking!"</p>
+            <div class="testimonial-author">
+              <img src="Images/FB1.jpg" alt="Tony Samarita" class="testimonial-avatar">
+              <div class="testimonial-info">
+                <h4>Tony Samarita</h4>
+                <span>Cordillera Tour</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card testimonial-card-3">
+            <p class="testimonial-text">"Great service and friendly staff. The Pinatubo trek was an adventure of a lifetime. Will definitely book again!"</p>
+            <div class="testimonial-author">
+              <img src="Images/GirlSea.jpg" alt="Alexa Go" class="testimonial-avatar">
+              <div class="testimonial-info">
+                <h4>Alexa Go</h4>
+                <span>Pinatubo Tour</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-stats">
+          <div class="stat-item">
+            <span class="stat-number" data-count="486">0</span>
+            <span class="stat-label">Happy Travelers</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-count="68">0</span>
+            <span class="stat-label">Tours Completed</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-count="95">0</span>
+            <span class="stat-label">% Satisfaction</span>
+          </div>
+        </div>
+      </section>
+    </main>
+    </div>
+    
+  <!-- CTA Section -->
+  <section id="cta-section" class="cta-section">
+    <div class="cta-container">
+      <h2>Have Questions? We'd Love to Hear From You!</h2>
+      <p>Ready to plan your perfect trip or need more information? Get in touch with our team today and start your Philippine adventure.</p>
+      <a href="#contact" class="cta-button" id="cta-contact-btn">Contact Us</a>
+    </div>
+  </section>
+
+    <!-- Contact -->
+  <section id="contact" class="section contact-hidden">
+    <button class="contact-close-btn" id="contact-close-btn">Close</button>
+   <div class="contact-box">
+     <div class="contact-card">
+      <h2 class="contact-section-title">Contact Us</h2>
+      <p> Fill up  the form for your Inquiry</p>
+
+    <form class="contact-form animate-on-scroll">
+      <input type="text" placeholder="Full Name" required />
+      <input type="email" placeholder="Email Address" required />
+      <textarea placeholder="Your Message"></textarea>
+      <button type="submit" class="contact-btn">Send Inquiry</button>
+      <br>
+    </form></div>
+   </div>
+  </section>
+
+  <!-- FOOTERS -->
+<footer>
+  <div class="section-container footer-container">
+        <div class="footer-col footer-logo-col">
+         <div class="footer-logo">
+            <a href="#" class="logo"><img src="Images/Aguiland%20logo%20High%20Res.png" width="120px" alt="aguilandlogo"></a>
+            </div>
+        </div>
+
+        <div class="footer-col footer-text-col">
+            Explore the PHILIPPINES ease and excitement through our all-in-one
+            bus travel platform. Your journey begins here — where smooth
+            planning meets unforgettable road experiences.
+              </p>
+            </div>
+
+        <div class="footer-col footer-contact-col">
+          <h4>Contact Us</h4>
+          <ul class="footer-link">
+            <li>
+              <a href="#">
+                <span class="footer-phone"></span>+91 12345 67890
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <span class="footer-email"></span>
+                Samaritasidney7@gmail.com
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <span class="footer-location"></span>
+                QUEZON CITY, PHILIPPINES
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    <div class="footer-bar">
+        Copyright © 2026 CODE-SID. All rights reserved.
+        <p>
+          Distributed by
+          <a
+            class="footer-last"
+            href="#"
+            target="_blank"
+            >SAMARITA</a>
+        </p>
+      </div>
+    </footer>
+    
+    <!-- Login -->
+    <!-- Home box -->
+    <section class="home">
+      <i class="form_close"></i>
+      <div class="form_container">
+        <!-- Login From -->
+        <div class="form login_form">
+         <button class="xicon"><img class="X-icon" src="Images/x%20icon.svg" height="25px" alt=""></button> 
+          <form action="user.php" method="POST" id="loginForm">
+            <input type="hidden" name="action" value="login" />
+            <h2>EMPLOYEE LOGIN</h2>
+
+            <div class="input_box">
+              <input type="text" id="loginUsername" name="username" placeholder="Enter your username" required />
+              <i class="alt email"></i>
+            </div>
+            <div class="input_box">
+              <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required />
+              <i class="alt password-toggle" onclick="togglePassword('loginPassword', this)"></i>
+            </div>
+
+            <div class="option_field">
+              <span class="checkbox">
+                <input type="checkbox" id="check" />
+                <label for="check">Remember me</label>
+              </span>
+              <a href="#" class="forgot_pw">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="button">Login Now</button>
+
+            <div class="login_signup">Don't have an account? <a href="#" id="signup">Signup</a></div>
+          </form>
+        </div>
+
+        <!-- Signup From -->
+        <div class="form signup_form">
+          <img class="xicon" src="Images/x%20icon.svg" height="35px" alt="">
+          <form action="user.php" method="POST" id="signupForm">
+            <input type="hidden" name="action" value="register" />
+            <h2>EMPLOYEE SIGNUP</h2>
+
+            <div class="input_box">
+              <input type="text" id="signupUsername" name="username" placeholder="Enter your username" required />
+              <i class="alt email"></i>
+            </div>
+            <div class="input_box">
+              <input type="password" id="signupPassword" name="password" placeholder="Create password" required />
+              <i class="alt password-toggle" onclick="togglePassword('signupPassword', this)"></i>
+            </div>
+            <div class="input_box">
+              <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm password" required />
+              <i class="alt password-toggle" onclick="togglePassword('confirmPassword', this)"></i>
+            </div>
+
+            <button type="submit" class="button">Signup Now</button>
+
+            <div class="login_signup">Already have an account? <a href="#" id="login">Login</a></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Booking Modal -->
+    <section class="booking-modal" id="bookingModal">
+      <div class="booking-modal-content">
+        <button class="booking-close-btn">&times;</button>
+        <h2>Book Your Tour</h2>
+        <p class="booking-tour-name" id="bookingTourName"></p>
+        <form class="booking-form" id="bookingForm">
+          <div class="booking">
+            <label for="bookingName">Full Name</label>
+            <input type="text" id="bookingName" name="bookingName" placeholder="Enter your full name" required />
+          </div>
+          <div class="booking">
+            <label for="bookingEmail">Email Address</label>
+            <input type="email" id="bookingEmail" name="bookingEmail" placeholder="Enter your email" required />
+          </div>
+          <div class="booking">
+            <label for="bookingPhone">Phone Number</label>
+            <input type="tel" id="bookingPhone" name="bookingPhone" placeholder="Enter your phone number" required />
+          </div>
+          <div class="booking">
+            <label for="bookingDate">Preferred Date</label>
+            <input type="date" id="bookingDate" name="bookingDate" required />
+          </div>
+          <div class="booking">
+            <label for="bookingGuests">Number of Guests</label>
+            <input type="number" id="bookingGuests" name="bookingGuests" min="1" max="10" placeholder="Number of guests" required />
+          </div>
+          <div class="booking">
+            <label for="bookingMessage">Additional Requests</label>
+            <textarea id="bookingMessage" name="bookingMessage" placeholder="Any special requests or questions?"></textarea>
+          </div>
+          <button type="submit" class="booking-submit-btn btn-white">Confirm Booking</button>
+        </form>
+      </div>
+    </section>
+ <script src="script.js"></script>
+</body>
+
+</html>
